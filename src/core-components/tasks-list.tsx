@@ -24,7 +24,7 @@ export default function TasksList() {
       </section>
       <section className="space-y-2">
         {
-          tasks.map(task => (
+          tasks.slice().reverse().map(task => (
             <TaskItem key={task.id} task={task} />
           ))
         }

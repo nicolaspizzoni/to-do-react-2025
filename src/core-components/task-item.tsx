@@ -19,7 +19,7 @@ interface TaskItemProps {
 export default function TaskItem({ task }: TaskItemProps) {
   const [isEditing, setIsEditing] = useState(task?.state == TaskState.Creating)
   const [title, setTitle] = useState(task.title || "")
-  const { updateTask } = useManageTask()
+  const { updateTask, updateTaskStatus, deleteTask } = useManageTask()
 
   function handleChangeTitle(e: ChangeEvent<HTMLInputElement>) {
     setTitle(e.target.value)
@@ -27,7 +27,7 @@ export default function TaskItem({ task }: TaskItemProps) {
 
   function saveTask(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    updateTask(task.id, {title: title})
+    updateTask(task.id, { title: title })
     setIsEditing(false)
   }
 
@@ -36,7 +36,18 @@ export default function TaskItem({ task }: TaskItemProps) {
   }
 
   function handleExitEditing() {
+    if (task.state == TaskState.Creating) {
+      deleteTask(task?.id)
+    }
     setIsEditing(false)
+  }
+
+  function handleChangeStatus(e: ChangeEvent<HTMLInputElement>) {
+    updateTaskStatus(task?.id, e.target.checked)
+  }
+
+  function handleDeleteTask() {
+    deleteTask(task?.id)
   }
 
   return (
@@ -44,12 +55,12 @@ export default function TaskItem({ task }: TaskItemProps) {
       {
         !isEditing ?
           <div>
-            <InputCheckbox checked={task?.concluded} />
+            <InputCheckbox checked={task?.concluded} onChange={handleChangeStatus} />
             <Text className={cx("flex-1", {
               'line-through': task?.concluded
             })}>{task?.title}</Text>
             <div className="flex gap-1">
-              <IconButton icon={TrashIcon} variant="tertiary" />
+              <IconButton icon={TrashIcon} variant="tertiary" onClick={handleDeleteTask} />
               <IconButton onClick={handleEditTask} icon={PencilIcon} variant="tertiary" />
             </div>
           </div>
