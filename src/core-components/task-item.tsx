@@ -11,14 +11,16 @@ import CheckIcon from "../assets/icons/checkRegular.svg?react"
 import { Task, TaskState } from "../models/tasks";
 import { cx } from "class-variance-authority";
 import { useManageTask } from "../hooks";
+import SkeletonComponent from "../components/skeleton";
 
 interface TaskItemProps {
-  task: Task
+  task?: Task,
+  loading?: boolean
 }
 
-export default function TaskItem({ task }: TaskItemProps) {
+export default function TaskItem({ task, loading }: TaskItemProps) {
   const [isEditing, setIsEditing] = useState(task?.state == TaskState.Creating)
-  const [title, setTitle] = useState(task.title || "")
+  const [title, setTitle] = useState(task?.title || "")
   const { updateTask, updateTaskStatus, deleteTask } = useManageTask()
 
   function handleChangeTitle(e: ChangeEvent<HTMLInputElement>) {
@@ -27,7 +29,7 @@ export default function TaskItem({ task }: TaskItemProps) {
 
   function saveTask(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    updateTask(task.id, { title: title })
+    updateTask(task!.id, { title: title })
     setIsEditing(false)
   }
 
@@ -36,18 +38,18 @@ export default function TaskItem({ task }: TaskItemProps) {
   }
 
   function handleExitEditing() {
-    if (task.state == TaskState.Creating) {
+    if (task?.state == TaskState.Creating) {
       deleteTask(task?.id)
     }
     setIsEditing(false)
   }
 
   function handleChangeStatus(e: ChangeEvent<HTMLInputElement>) {
-    updateTaskStatus(task?.id, e.target.checked)
+    updateTaskStatus(task!.id, e.target.checked)
   }
 
   function handleDeleteTask() {
-    deleteTask(task?.id)
+    deleteTask(task!.id)
   }
 
   return (
@@ -55,13 +57,17 @@ export default function TaskItem({ task }: TaskItemProps) {
       {
         !isEditing ?
           <div>
-            <InputCheckbox checked={task?.concluded} onChange={handleChangeStatus} />
-            <Text className={cx("flex-1", {
-              'line-through': task?.concluded
-            })}>{task?.title}</Text>
+            <InputCheckbox loading={loading} checked={task?.concluded} onChange={handleChangeStatus} />
+            {
+              loading ?
+                <SkeletonComponent className={"flex-1 h-6"} />
+                : <Text className={cx("flex-1", {
+                  'line-through': task?.concluded
+                })}>{task?.title}</Text>
+            }
             <div className="flex gap-1">
-              <IconButton icon={TrashIcon} variant="tertiary" onClick={handleDeleteTask} />
-              <IconButton onClick={handleEditTask} icon={PencilIcon} variant="tertiary" />
+              <IconButton loading={loading} icon={TrashIcon} variant="tertiary" onClick={handleDeleteTask} />
+              <IconButton loading={loading} onClick={handleEditTask} icon={PencilIcon} variant="tertiary" />
             </div>
           </div>
           :

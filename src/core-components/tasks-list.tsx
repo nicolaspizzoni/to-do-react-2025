@@ -6,7 +6,7 @@ import { TaskState } from "../models/tasks";
 
 
 export default function TasksList() {
-  const { tasks } = useTasks()
+  const { tasks, isLoadingTasks } = useTasks()
   const { prepareTask } = useManageTask()
 
   console.log(tasks)
@@ -18,14 +18,19 @@ export default function TasksList() {
   return (
     <>
       <section>
-        <Button disabled={tasks.some(task => task?.state == TaskState.Creating)} icon={PlusIcon} className="w-full" onClick={handleNewTask}>
+        <Button disabled={tasks.some(task => task?.state == TaskState.Creating) || isLoadingTasks} icon={PlusIcon} className="w-full" onClick={handleNewTask}>
           Nova Tarefa
         </Button>
       </section>
       <section className="space-y-2">
         {
-          tasks.slice().reverse().map(task => (
+          !isLoadingTasks && tasks.slice().reverse().map(task => (
             <TaskItem key={task.id} task={task} />
+          ))
+        }
+        {
+          isLoadingTasks && [1, 2, 3].map(() => (
+            <TaskItem loading={isLoadingTasks} />
           ))
         }
       </section>
